@@ -30,4 +30,4 @@ vendor/
 
 generator/test_out/*
 
-microgen
+cmd/microgen/microgen

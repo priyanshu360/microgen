@@ -46,15 +46,8 @@ const (
 )
 
 func ListTemplatesForGen(ctx context.Context, iface *types.Interface, absOutPath, sourcePath string, genProto string, genMain bool) (units []*GenerationUnit, err error) {
-	importPackagePath, err := resolvePackagePath(filepath.Dir(sourcePath))
-	if err != nil {
-		return nil, err
-	}
+	importPackagePath := filepath.Dir(sourcePath)
 	absSourcePath, err := filepath.Abs(sourcePath)
-	if err != nil {
-		return nil, err
-	}
-	outImportPath, err := resolvePackagePath(absOutPath)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +59,7 @@ func ListTemplatesForGen(ctx context.Context, iface *types.Interface, absOutPath
 		SourcePackageImport:   importPackagePath,
 		SourceFilePath:        absSourcePath,
 		Iface:                 iface,
-		OutputPackageImport:   outImportPath,
+		OutputPackageImport:   absOutPath,
 		OutputFilePath:        absOutPath,
 		ProtobufPackageImport: mstrings.FetchMetaInfo(TagMark+ProtobufTag, iface.Docs),
 		FileHeader:            defaultFileHeader,

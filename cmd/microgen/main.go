@@ -101,11 +101,7 @@ func listInterfaces(ii []types.Interface) string {
 
 func prepareContext(filename string, iface *types.Interface) (context.Context, error) {
 	ctx := context.Background()
-	p, err := astra.ResolvePackagePath(filename)
-	if err != nil {
-		return nil, err
-	}
-	ctx = template.WithSourcePackageImport(ctx, p)
+	ctx = template.WithSourcePackageImport(ctx, filename)
 
 	set := template.TagsSet{}
 	genTags := mstrings.FetchTags(iface.Docs, generator.TagMark+generator.MicrogenMainTag)
