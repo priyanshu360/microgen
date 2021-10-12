@@ -91,7 +91,8 @@ func converterToProtoBody(field *types.Variable) Code {
 		)
 		s.Line().Return().List(Op("&").Qual(GolangProtobufWrappers, "StringValue").Block(Dict{Id("Value"): Op("*").Id(mstrings.ToLowerFirst(field.Name)).Op(",")}), Nil())
 	default:
-		s.Panic(Lit("function not provided")).Comment("// TODO: provide converter")
+		s.Return().List(Id(mstrings.ToLowerFirst(field.Name)), Nil())
+		//s.Panic(Lit("function not provided")).Comment("// TODO: provide converter")
 	}
 	return s
 }
@@ -116,7 +117,8 @@ func converterProtoToBody(field *types.Variable) Code {
 		)
 		s.Line().Return().List(Op("&").Id("proto"+mstrings.ToUpperFirst(field.Name)).Dot("Value"), Nil())
 	default:
-		s.Panic(Lit("function not provided")).Comment("// TODO: provide converter")
+		s.Return().List(Id("proto"+mstrings.ToUpperFirst(field.Name)), Nil())
+		//s.Panic(Lit("function not provided")).Comment("// TODO: provide converter")
 	}
 	return s
 }
