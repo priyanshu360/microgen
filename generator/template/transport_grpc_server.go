@@ -2,6 +2,7 @@ package template
 
 import (
 	"context"
+	"fmt"
 
 	. "github.com/dave/jennifer/jen"
 	mstrings "github.com/devimteam/microgen/generator/strings"
@@ -70,6 +71,8 @@ func (t *gRPCServerTemplate) Render(ctx context.Context) write_strategy.Renderer
 	f.PackageComment(`DO NOT EDIT.`)
 
 	f.Type().Id(privateServerStructName(t.info.Iface)).StructFunc(func(g *Group) {
+		unimplementedServerEmbedString := fmt.Sprintf("pb.Unimplemented%s", serverStructName(t.info.Iface))
+		g.Id(unimplementedServerEmbedString)
 		for _, method := range t.info.Iface.Methods {
 			if !t.info.AllowedMethods[method.Name] {
 				continue
