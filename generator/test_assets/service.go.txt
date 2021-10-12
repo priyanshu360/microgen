@@ -8,7 +8,7 @@ import (
 
 // @microgen middleware, logging, grpc, http, recover, main
 // @grpc-addr devim.string.team
-// @protobuf github.com/devimteam/protobuf/stringsvc
+// @protobuf github.com/recolabs/protobuf/stringsvc
 type StringService interface {
 	// @logs-ignore ans, err
 	Uppercase(ctx context.Context, str ...map[string]interface{}) (ans string, err error)
