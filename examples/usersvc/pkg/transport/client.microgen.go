@@ -5,9 +5,9 @@ package transport
 import (
 	"context"
 	"errors"
-	usersvc "github.com/devimteam/microgen/examples/usersvc/pkg/usersvc"
 	opentracing "github.com/go-kit/kit/tracing/opentracing"
 	opentracinggo "github.com/opentracing/opentracing-go"
+	usersvc "github.com/recolabs/microgen/examples/usersvc/pkg/usersvc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
 )

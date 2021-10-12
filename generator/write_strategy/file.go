@@ -9,7 +9,7 @@ import (
 	"path"
 	"path/filepath"
 
-	lg "github.com/devimteam/microgen/logger"
+	lg "github.com/recolabs/microgen/logger"
 )
 
 const (

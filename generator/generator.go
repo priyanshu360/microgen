@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/devimteam/microgen/generator/template"
-	"github.com/devimteam/microgen/generator/write_strategy"
+	"github.com/recolabs/microgen/generator/template"
+	"github.com/recolabs/microgen/generator/write_strategy"
 )
 
 const (

@@ -4,8 +4,8 @@ package service
 
 import (
 	"context"
-	service "github.com/devimteam/microgen/examples/usersvc/pkg/usersvc"
 	log "github.com/go-kit/kit/log"
+	service "github.com/recolabs/microgen/examples/usersvc/pkg/usersvc"
 )
 
 // ErrorLoggingMiddleware writes to logger any error, if it is not nil.

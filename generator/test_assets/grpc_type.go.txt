@@ -4,7 +4,7 @@
 package protobuf
 
 import (
-	entity "github.com/devimteam/microgen/example/svc/entity"
+	entity "github.com/recolabs/microgen/example/svc/entity"
 	stringsvc "github.com/devimteam/protobuf/stringsvc"
 )
 

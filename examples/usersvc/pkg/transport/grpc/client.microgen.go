@@ -3,13 +3,13 @@
 package transportgrpc
 
 import (
-	pb "github.com/devimteam/microgen/examples/protobuf"
-	transport "github.com/devimteam/microgen/examples/usersvc/pkg/transport"
 	log "github.com/go-kit/kit/log"
 	opentracing "github.com/go-kit/kit/tracing/opentracing"
 	grpckit "github.com/go-kit/kit/transport/grpc"
 	empty "github.com/golang/protobuf/ptypes/empty"
 	opentracinggo "github.com/opentracing/opentracing-go"
+	pb "github.com/recolabs/microgen/examples/protobuf"
+	transport "github.com/recolabs/microgen/examples/usersvc/pkg/transport"
 	grpc "google.golang.org/grpc"
 )
 

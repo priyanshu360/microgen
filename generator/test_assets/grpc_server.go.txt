@@ -3,8 +3,8 @@
 package transportgrpc
 
 import (
-	testout "github.com/devimteam/microgen/generator/test_out"
-	protobuf "github.com/devimteam/microgen/generator/test_out/transport/converter/protobuf"
+	testout "github.com/recolabs/microgen/generator/test_out"
+	protobuf "github.com/recolabs/microgen/generator/test_out/transport/converter/protobuf"
 	stringsvc "github.com/devimteam/protobuf/stringsvc"
 	grpc "github.com/go-kit/kit/transport/grpc"
 	context "golang.org/x/net/context"

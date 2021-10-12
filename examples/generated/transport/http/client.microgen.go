@@ -3,7 +3,6 @@
 package transporthttp
 
 import (
-	transport "github.com/devimteam/microgen/examples/generated/transport"
 	endpoint "github.com/go-kit/kit/endpoint"
 	log "github.com/go-kit/kit/log"
 	sd "github.com/go-kit/kit/sd"
@@ -11,6 +10,7 @@ import (
 	opentracing "github.com/go-kit/kit/tracing/opentracing"
 	httpkit "github.com/go-kit/kit/transport/http"
 	opentracinggo "github.com/opentracing/opentracing-go"
+	transport "github.com/recolabs/microgen/examples/generated/transport"
 	"io"
 	"net/url"
 )

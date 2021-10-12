@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	. "github.com/dave/jennifer/jen"
-	mstrings "github.com/devimteam/microgen/generator/strings"
+	mstrings "github.com/recolabs/microgen/generator/strings"
 	"github.com/vetcher/go-astra/types"
 )
 

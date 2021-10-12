@@ -12,10 +12,10 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/devimteam/microgen/generator"
-	mstrings "github.com/devimteam/microgen/generator/strings"
-	"github.com/devimteam/microgen/generator/template"
-	lg "github.com/devimteam/microgen/logger"
+	"github.com/recolabs/microgen/generator"
+	mstrings "github.com/recolabs/microgen/generator/strings"
+	"github.com/recolabs/microgen/generator/template"
+	lg "github.com/recolabs/microgen/logger"
 	"github.com/vetcher/go-astra"
 	"github.com/vetcher/go-astra/types"
 )

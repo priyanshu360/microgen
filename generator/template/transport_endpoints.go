@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	. "github.com/dave/jennifer/jen"
-	"github.com/devimteam/microgen/generator/write_strategy"
+	"github.com/recolabs/microgen/generator/write_strategy"
 )
 
 const (

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	mstrings "github.com/devimteam/microgen/generator/strings"
-	"github.com/devimteam/microgen/generator/template"
+	mstrings "github.com/recolabs/microgen/generator/strings"
+	"github.com/recolabs/microgen/generator/template"
 	"github.com/vetcher/go-astra/types"
 )
 

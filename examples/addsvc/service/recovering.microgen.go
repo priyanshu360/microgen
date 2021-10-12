@@ -5,8 +5,8 @@ package service
 import (
 	"context"
 	"fmt"
-	service "github.com/devimteam/microgen/examples/addsvc/addsvc"
 	log "github.com/go-kit/kit/log"
+	service "github.com/recolabs/microgen/examples/addsvc/addsvc"
 )
 
 // RecoveringMiddleware recovers panics from method calls, writes to provided logger and returns the error of panic as method error.

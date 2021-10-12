@@ -4,8 +4,8 @@ package service
 
 import (
 	"context"
-	service "github.com/devimteam/microgen/examples/addsvc/addsvc"
 	log "github.com/go-kit/kit/log"
+	service "github.com/recolabs/microgen/examples/addsvc/addsvc"
 )
 
 // Cache interface uses for middleware as key-value storage for requests.

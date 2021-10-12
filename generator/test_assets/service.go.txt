@@ -3,7 +3,7 @@ package stringsvc
 import (
 	"context"
 
-	"github.com/devimteam/microgen/example/svc/entity"
+	"github.com/recolabs/microgen/example/svc/entity"
 )
 
 // @microgen middleware, logging, grpc, http, recover, main

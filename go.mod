@@ -1,4 +1,4 @@
-module github.com/devimteam/microgen
+module github.com/recolabs/microgen
 
 go 1.16
 

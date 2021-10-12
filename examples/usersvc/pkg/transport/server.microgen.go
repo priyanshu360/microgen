@@ -4,10 +4,10 @@ package transport
 
 import (
 	"context"
-	usersvc "github.com/devimteam/microgen/examples/usersvc/pkg/usersvc"
 	endpoint "github.com/go-kit/kit/endpoint"
 	opentracing "github.com/go-kit/kit/tracing/opentracing"
 	opentracinggo "github.com/opentracing/opentracing-go"
+	usersvc "github.com/recolabs/microgen/examples/usersvc/pkg/usersvc"
 )
 
 func Endpoints(svc usersvc.UserService) EndpointsSet {

@@ -4,7 +4,7 @@ import (
 	"context"
 
 	. "github.com/dave/jennifer/jen"
-	"github.com/devimteam/microgen/generator/write_strategy"
+	"github.com/recolabs/microgen/generator/write_strategy"
 )
 
 const (
@@ -27,7 +27,7 @@ func NewMiddlewareTemplate(info *GenerationInfo) Template {
 //		// DO NOT EDIT.
 //		package middleware
 //
-//		import svc "github.com/devimteam/microgen/examples/svc"
+//		import svc "github.com/recolabs/microgen/examples/svc"
 //
 //		type Middleware func(svc.StringService) svc.StringService
 //

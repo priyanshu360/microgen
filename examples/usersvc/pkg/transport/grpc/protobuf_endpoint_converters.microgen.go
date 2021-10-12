@@ -6,9 +6,9 @@ package transportgrpc
 import (
 	"context"
 	"errors"
-	pb "github.com/devimteam/microgen/examples/protobuf"
-	transport "github.com/devimteam/microgen/examples/usersvc/pkg/transport"
 	empty "github.com/golang/protobuf/ptypes/empty"
+	pb "github.com/recolabs/microgen/examples/protobuf"
+	transport "github.com/recolabs/microgen/examples/usersvc/pkg/transport"
 )
 
 func _Encode_CreateUser_Request(ctx context.Context, request interface{}) (interface{}, error) {

@@ -4,8 +4,8 @@ package service
 
 import (
 	"context"
-	service "github.com/devimteam/microgen/examples/usersvc/pkg/usersvc"
 	log "github.com/go-kit/kit/log"
+	service "github.com/recolabs/microgen/examples/usersvc/pkg/usersvc"
 	"time"
 )
 

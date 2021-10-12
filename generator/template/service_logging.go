@@ -4,8 +4,8 @@ import (
 	"context"
 
 	. "github.com/dave/jennifer/jen"
-	mstrings "github.com/devimteam/microgen/generator/strings"
-	"github.com/devimteam/microgen/generator/write_strategy"
+	mstrings "github.com/recolabs/microgen/generator/strings"
+	"github.com/recolabs/microgen/generator/write_strategy"
 	"github.com/vetcher/go-astra/types"
 )
 
@@ -39,7 +39,7 @@ func NewLoggingTemplate(info *GenerationInfo) Template {
 //
 //		import (
 //			context "context"
-//			svc "github.com/devimteam/microgen/examples/svc"
+//			svc "github.com/recolabs/microgen/examples/svc"
 //			log "github.com/go-kit/kit/log"
 //			time "time"
 //		)

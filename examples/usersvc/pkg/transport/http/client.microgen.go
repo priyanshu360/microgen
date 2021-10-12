@@ -3,11 +3,11 @@
 package transporthttp
 
 import (
-	transport "github.com/devimteam/microgen/examples/usersvc/pkg/transport"
 	log "github.com/go-kit/kit/log"
 	opentracing "github.com/go-kit/kit/tracing/opentracing"
 	httpkit "github.com/go-kit/kit/transport/http"
 	opentracinggo "github.com/opentracing/opentracing-go"
+	transport "github.com/recolabs/microgen/examples/usersvc/pkg/transport"
 	"net/url"
 )
 

@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	. "github.com/dave/jennifer/jen"
-	mstrings "github.com/devimteam/microgen/generator/strings"
-	"github.com/devimteam/microgen/generator/write_strategy"
+	mstrings "github.com/recolabs/microgen/generator/strings"
+	"github.com/recolabs/microgen/generator/write_strategy"
 	"github.com/vetcher/go-astra/types"
 )
 
@@ -87,8 +87,8 @@ func gorillaMuxUrlTemplateVarList(vars []types.Variable) []string {
 //		package transporthttp
 //
 //		import (
-//			svc "github.com/devimteam/microgen/examples/svc"
-//			http2 "github.com/devimteam/microgen/examples/svc/transport/converter/http"
+//			svc "github.com/recolabs/microgen/examples/svc"
+//			http2 "github.com/recolabs/microgen/examples/svc/transport/converter/http"
 //			http "github.com/go-kit/kit/transport/http"
 //			http1 "net/http"
 //		)
