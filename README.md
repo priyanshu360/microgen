@@ -1,3 +1,4 @@
+This is a fork of the original microgen repo: https://github.com/devimteam/microgen
 # Microgen
 
 Tool to generate microservices, based on [go-kit](https://gokit.io/), by specified service interface.  
