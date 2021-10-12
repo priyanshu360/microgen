@@ -1,11 +1,15 @@
 package main
 
 import (
+	"bufio"
 	"context"
+	"errors"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/devimteam/microgen/generator"
@@ -35,15 +39,96 @@ func init() {
 	flag.Parse()
 }
 
+func readFromInput(prefix string, delim byte) (string, error) {
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Print(prefix)
+	input, err := reader.ReadString(delim)
+	if err != nil {
+		return "", err
+	}
+	return strings.TrimRight(input, "\n \t\r\f\v"), nil
+}
+
+func findPackageNameFromGoModFile(filePath string) (string, error) {
+	buffer, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		return "", err
+	}
+	r, err := regexp.Compile(`module\s+(.*)`)
+	if err != nil {
+		return "", err
+	}
+
+	result := r.FindStringSubmatch(string(buffer))
+	if len(result) > 0 {
+		return result[1], nil
+	}
+
+	return "", errors.New("could not find package name")
+}
+
+const (
+	goModFileName = "go.mod"
+)
+
 func main() {
 	lg.Logger.Level = *flagVerbose
 	if *flagDebug {
 		lg.Logger.Level = 100
 	}
 	lg.Logger.Logln(1, "@microgen", Version)
-	if *flagHelp || *flagFileName == "" || *flagOutputDir == "" || *flagPackageName == "" {
+	if *flagHelp {
 		flag.Usage()
 		os.Exit(0)
+	}
+
+	if *flagFileName == "" {
+		val, err := readFromInput("file path with interfaces: ", '\n')
+		if err != nil {
+			lg.Logger.Logln(0, "fatal:", err)
+			os.Exit(1)
+		}
+		if val == "" {
+			flag.Usage()
+			os.Exit(0)
+		}
+
+		*flagFileName = val
+	}
+	if *flagOutputDir == "" {
+		defaultDir := filepath.Dir(*flagFileName)
+		*flagOutputDir = defaultDir
+		printLine := fmt.Sprintf("output directory [%v]: ", defaultDir)
+		val, err := readFromInput(printLine, '\n')
+		if err != nil {
+			lg.Logger.Logln(0, "fatal:", err)
+			os.Exit(1)
+		}
+		if val != "" {
+			*flagOutputDir = val
+		}
+		if *flagOutputDir == "" {
+			flag.Usage()
+			os.Exit(0)
+		}
+	}
+	if *flagPackageName == "" {
+		goModFilePath := filepath.Join(*flagOutputDir, goModFileName)
+		defaultPackageName, _ := findPackageNameFromGoModFile(goModFilePath)
+		*flagPackageName = defaultPackageName
+		printLine := fmt.Sprintf("pacakge name for imports [%v]: ", defaultPackageName)
+		val, err := readFromInput(printLine, '\n')
+		if err != nil {
+			lg.Logger.Logln(0, "fatal:", err)
+			os.Exit(1)
+		}
+		if val != "" {
+			*flagPackageName = val
+		}
+		if *flagPackageName == "" {
+			flag.Usage()
+			os.Exit(0)
+		}
 	}
 
 	lg.Logger.Logln(4, "Source file:", *flagFileName)
