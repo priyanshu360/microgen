@@ -8,7 +8,11 @@ The goal is to generate code for service which not fun to write but it should be
 go get -u github.com/recolabs/microgen/cmd/microgen
 ```
 
-Note: If you have problems with building microgen, please, install [dep](https://github.com/golang/dep) and use `dep ensure` command to install correct versions of dependencies ([#29](https://github.com/recolabs/microgen/issues/29)).
+Note: If you have problems with building microgen, please clone the repository, and run 
+```
+go mod vendor
+go mod tidy
+```
 
 ## Usage
 ``` sh
