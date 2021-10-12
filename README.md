@@ -83,14 +83,15 @@ To find more, check examples folder.
 
 ### Options
 
-| Name   | Default    | Description                                                                   |
-|:------ |:-----------|:------------------------------------------------------------------------------|
-| -file  | service.go | Relative path to source file with service interface                           |
-| -out   | .          | Relative or absolute path to directory, where you want to see generated files |
-| -v     | 1          | Sets microgen verbose level. 0 - print only errors.                           |
-| -help  | false      | Print usage information                                                       |
-| -debug | false      | Print all microgen messages. Equivalent to -v=100.                            |
-| -.proto|            | Package field in protobuf file. If not empty, service.proto file will be generated. |
+| Name     | Default    | Description                                                                         |
+|:---------|:-----------|:------------------------------------------------------------------------------------|
+| -file    |            | Relative path to source file with service interface                                 |
+| -out     |            | Relative or absolute path to directory, where you want to see generated files       |
+| -package |            | Package name for imports                                                            |
+| -v       | 1          | Sets microgen verbose level. 0 - print only errors.                                 |
+| -help    | false      | Print usage information                                                             |
+| -debug   | false      | Print all microgen messages. Equivalent to -v=100.                                  |
+| -.proto  |            | Package field in protobuf file. If not empty, service.proto file will be generated. |
 
 \* __Required option__
 
