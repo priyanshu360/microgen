@@ -22,6 +22,37 @@ microgen tool search in file first `type * interface` with docs, that contains `
 
 generation parameters provides through ["tags"](#tags) in interface docs after general `// @microgen` tag (space before @ __required__).
 
+if you run microgen without any flags, the shell will prompt you with insertable fields to insert the required parameters.
+microgen will try and guess your output directory and your package name by lokking in the inputed file directory.
+example:
+``` sh
+microgen
+@microgen 1.0.0
+file path with interfaces: src/service.go
+output directory [src]:
+pacakge name for imports [github.com/recolabs/reco/auth-service]:
+all files successfully generated
+
+```
+
+## Interface declaration rules
+For correct generation, please, follow rules below.
+
+General:
+* Interface should be valid golang code.
+* All interface method's arguments and results should be named and should be different (name duplicating unacceptable).
+* First argument of each method should be of type `context.Context` (from [standard library](https://golang.org/pkg/context/)).
+* Last result should be builtin `error` type.
+---
+GRPC and Protobuf:  
+* Name of _protobuf_ service should be the same, as interface name.
+* Function names in _protobuf_ should be the same, as in interface.
+* Message names in _protobuf_ should be named `<FunctionName>Request` or `<FunctionName>Response` for request/response message respectively.
+* Field names in _protobuf_ messages should be the same, as in interface methods (_protobuf_ - snake_case, interface - camelCase).
+---
+HTTP GET method (`// @http-method GET`)
+* Parameters types should be `string`, `int`, `int32`, `int64`, `uint`, `uint32` or `uint64`.
+
 #### Recommended project layout
 Microgen uses [standard-like](https://github.com/golang-standards/project-layout) layout for generating boilerplate.
 Default layout of project:
@@ -253,24 +284,6 @@ all files successfully generated
 6. Use endpoints in your `package main` or wherever you want. (tag `main` generates some code for `package main`)
 
 __*__ `GOPATH/bin` should be in your PATH.
-
-## Interface declaration rules
-For correct generation, please, follow rules below.
-
-General:
-* Interface should be valid golang code.
-* All interface method's arguments and results should be named and should be different (name duplicating unacceptable).
-* First argument of each method should be of type `context.Context` (from [standard library](https://golang.org/pkg/context/)).
-* Last result should be builtin `error` type.
----
-GRPC and Protobuf:  
-* Name of _protobuf_ service should be the same, as interface name.
-* Function names in _protobuf_ should be the same, as in interface.
-* Message names in _protobuf_ should be named `<FunctionName>Request` or `<FunctionName>Response` for request/response message respectively.
-* Field names in _protobuf_ messages should be the same, as in interface methods (_protobuf_ - snake_case, interface - camelCase).
----
-HTTP GET method (`// @http-method GET`)
-* Parameters types should be `string`, `int`, `int32`, `int64`, `uint`, `uint32` or `uint64`.
 
 ## Dependency
 list out of date!
