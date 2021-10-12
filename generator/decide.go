@@ -45,8 +45,8 @@ const (
 	HttpMethodPath = template.HttpMethodPath
 )
 
-func ListTemplatesForGen(ctx context.Context, iface *types.Interface, absOutPath, sourcePath string, genProto string, genMain bool) (units []*GenerationUnit, err error) {
-	importPackagePath := filepath.Dir(sourcePath)
+func ListTemplatesForGen(ctx context.Context, iface *types.Interface, absOutPath, sourcePath, packageName string, genProto string, genMain bool) (units []*GenerationUnit, err error) {
+
 	absSourcePath, err := filepath.Abs(sourcePath)
 	if err != nil {
 		return nil, err
@@ -56,10 +56,10 @@ func ListTemplatesForGen(ctx context.Context, iface *types.Interface, absOutPath
 		m[fn.Name] = !mstrings.ContainTag(mstrings.FetchTags(fn.Docs, TagMark+MicrogenMainTag), "-")
 	}
 	info := &template.GenerationInfo{
-		SourcePackageImport:   importPackagePath,
+		SourcePackageImport:   packageName,
 		SourceFilePath:        absSourcePath,
 		Iface:                 iface,
-		OutputPackageImport:   absOutPath,
+		OutputPackageImport:   packageName,
 		OutputFilePath:        absOutPath,
 		ProtobufPackageImport: mstrings.FetchMetaInfo(TagMark+ProtobufTag, iface.Docs),
 		FileHeader:            defaultFileHeader,
