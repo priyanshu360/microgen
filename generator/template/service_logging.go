@@ -220,6 +220,8 @@ func (t *loggingTemplate) loggingFuncBody(signature *types.Function) func(g *Gro
 			Id(rec(serviceLoggingStructName)).Dot(_logger_).Dot("Log").CallFunc(func(g *Group) {
 				g.Line().Lit("method")
 				g.Lit(signature.Name)
+				g.Line().Lit("message")
+				g.Lit(signature.Name + " called")
 
 				if t.calcParamAmount(signature.Name, RemoveContextIfFirst(signature.Args)) > 0 {
 					g.Line().List(Lit("request"), t.logRequest(normal))
