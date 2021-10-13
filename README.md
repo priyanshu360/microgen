@@ -32,6 +32,7 @@ microgen
 file path with interfaces: src/service.go
 output directory [src]:
 pacakge name for imports [github.com/recolabs/reco/auth-service]:
+path to XXX_service.pb.go:
 all files successfully generated
 
 ```
