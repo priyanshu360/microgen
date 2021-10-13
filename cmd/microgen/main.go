@@ -26,6 +26,7 @@ const (
 
 var (
 	flagFileName     = flag.String("file", "", "Path to input file with interface.")
+	flagPbGoFileName = flag.String("pb-go", "", "Path to XXX_service.pb.go file with protobuf implementation of interface structs.")
 	flagOutputDir    = flag.String("out", "", "Output directory.")
 	flagPackageName  = flag.String("package", "", "Package name for imports")
 	flagHelp         = flag.Bool("help", false, "Show help.")
@@ -131,11 +132,29 @@ func main() {
 		}
 	}
 
+	if *flagPbGoFileName == "" {
+		val, err := readFromInput("path to XXX_service.pb.go: ", '\n')
+		if err != nil {
+			lg.Logger.Logln(0, "fatal:", err)
+			os.Exit(1)
+		}
+
+		*flagPbGoFileName = val
+	}
+
 	lg.Logger.Logln(4, "Source file:", *flagFileName)
 	info, err := astra.ParseFile(*flagFileName)
 	if err != nil {
 		lg.Logger.Logln(0, "fatal:", err)
 		os.Exit(1)
+	}
+	var pbGoFile *types.File = nil
+	if *flagPbGoFileName != "" {
+		pbGoFile, err = astra.ParseFile(*flagPbGoFileName)
+		if err != nil {
+			lg.Logger.Logln(0, "fatal:", err)
+			os.Exit(1)
+		}
 	}
 
 	i := findInterface(info)
@@ -146,7 +165,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := generator.ValidateInterface(i); err != nil {
+	if err := generator.ValidateInterface(i, pbGoFile); err != nil {
 		lg.Logger.Logln(0, "validation:", err)
 		os.Exit(1)
 	}

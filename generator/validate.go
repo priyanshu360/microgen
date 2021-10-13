@@ -9,13 +9,13 @@ import (
 	"github.com/vetcher/go-astra/types"
 )
 
-func ValidateInterface(iface *types.Interface) error {
+func ValidateInterface(iface *types.Interface, pbGoFile *types.File) error {
 	var errs []error
 	if len(iface.Methods) == 0 {
 		errs = append(errs, fmt.Errorf("%s does not have any methods", iface.Name))
 	}
 	for _, m := range iface.Methods {
-		errs = append(errs, validateFunction(m)...)
+		errs = append(errs, validateFunction(m, pbGoFile)...)
 	}
 	return composeErrors(errs...)
 }
@@ -24,7 +24,7 @@ func ValidateInterface(iface *types.Interface) error {
 // * First argument is context.Context.
 // * Last result is error.
 // * All params have names.
-func validateFunction(fn *types.Function) (errs []error) {
+func validateFunction(fn *types.Function, pbGoFile *types.File) (errs []error) {
 	// don't validate when `@microgen -` provided
 	if mstrings.ContainTag(mstrings.FetchTags(fn.Docs, TagMark+MicrogenMainTag), "-") {
 		return
@@ -51,6 +51,74 @@ func validateFunction(fn *types.Function) (errs []error) {
 	}
 	if template.FetchHttpMethodTag(fn.Docs) == "GET" && !isArgumentsAllowSmartPath(fn) {
 		errs = append(errs, fmt.Errorf("%s: can't use GET method with provided arguments", fn.Name))
+	}
+	if pbGoFile != nil {
+		errs = append(errs, validateFuncionInPbGoFile(fn, pbGoFile)...)
+	}
+	return
+}
+
+func requestStructName(signature *types.Function) string {
+	return signature.Name + "Request"
+}
+
+func responseStructName(signature *types.Function) string {
+	return signature.Name + "Response"
+}
+
+func findStruct(name string, grpcPb *types.File) *types.Struct {
+	for _, s := range grpcPb.Structures {
+		if s.Name == name {
+			return &s
+		}
+	}
+	return nil
+}
+
+func findField(name string, s *types.Struct) *types.StructField {
+	for _, f := range s.Fields {
+		if f.Name == name {
+			return &f
+		}
+	}
+	return nil
+}
+
+func validateFuncionInPbGoFile(fn *types.Function, pbGoFile *types.File) (errs []error) {
+	requestStructName := requestStructName(fn)
+	s := findStruct(requestStructName, pbGoFile)
+	if s == nil {
+		errs = append(errs, fmt.Errorf("did not find struct %v in grpc pb file", requestStructName))
+		return
+	}
+	for i, arg := range fn.Args {
+		if i == 0 {
+			// Note - we already now the first argument is 'ctx context.context'
+			continue
+		}
+		protoFieldName := mstrings.ToUpperFirst(arg.Name)
+		foundArg := findField(protoFieldName, s)
+		if foundArg == nil {
+			errs = append(errs, fmt.Errorf("did not find field %v in struct %v in grpc pb file", protoFieldName, requestStructName))
+		}
+	}
+
+	responseStructName := responseStructName(fn)
+	s = findStruct(responseStructName, pbGoFile)
+	if s == nil {
+		errs = append(errs, fmt.Errorf("did not find struct %v in grpc pb file", responseStructName))
+		return
+	}
+	for i, res := range fn.Results {
+		if i == len(fn.Results)-1 {
+			// Note - we already now the last return is 'err error'
+			continue
+		}
+		protoFieldName := mstrings.ToUpperFirst(res.Name)
+		foundArg := findField(protoFieldName, s)
+		if foundArg == nil {
+			errs = append(errs, fmt.Errorf("did not find field %v in struct %v in grpc pb file", protoFieldName, responseStructName))
+		}
 	}
 	return
 }
