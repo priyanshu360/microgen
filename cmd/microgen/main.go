@@ -133,7 +133,7 @@ func main() {
 	}
 
 	if *flagPbGoFileName == "" {
-		val, err := readFromInput("path to XXX_service.pb.go: ", '\n')
+		val, err := readFromInput("path to XXX_service.pb.go (leave empty for no pb validation): ", '\n')
 		if err != nil {
 			lg.Logger.Logln(0, "fatal:", err)
 			os.Exit(1)

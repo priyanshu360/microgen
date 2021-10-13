@@ -2,6 +2,7 @@ package generator
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	mstrings "github.com/recolabs/microgen/generator/strings"
@@ -84,6 +85,46 @@ func findField(name string, s *types.Struct) *types.StructField {
 	return nil
 }
 
+func typeWithNoImport(field types.Type) string {
+	typeName := ""
+	for field != nil {
+		switch i := field.(type) {
+		case types.TImport:
+			field = i.Next
+		case types.TName:
+			typeName += i.TypeName
+			field = nil
+		case types.TArray:
+			str := ""
+			if i.IsEllipsis {
+				str += "..."
+			} else if i.IsSlice {
+				str += "[]"
+			} else {
+				str += "[" + strconv.Itoa(i.ArrayLen) + "]"
+			}
+			typeName += str
+			field = i.Next
+		case types.TMap:
+			typeName += "map[" + i.Key.String() + "]" + i.Value.String()
+			field = nil
+		case types.TPointer:
+			typeName += strings.Repeat("*", i.NumberOfPointers)
+			field = i.Next
+		case types.TInterface:
+			typeName += i.Interface.String()
+			field = nil
+		case types.TEllipsis:
+			typeName += "..."
+			field = i.Next
+		default:
+			break
+		}
+	}
+
+	return typeName
+}
+
 func validateFuncionInPbGoFile(fn *types.Function, pbGoFile *types.File) (errs []error) {
 	requestStructName := requestStructName(fn)
 	s := findStruct(requestStructName, pbGoFile)
@@ -97,10 +138,17 @@ func validateFuncionInPbGoFile(fn *types.Function, pbGoFile *types.File) (errs [
 			continue
 		}
 		protoFieldName := mstrings.ToUpperFirst(arg.Name)
-		foundArg := findField(protoFieldName, s)
-		if foundArg == nil {
+		foundField := findField(protoFieldName, s)
+		if foundField == nil {
 			errs = append(errs, fmt.Errorf("did not find field %v in struct %v in grpc pb file", protoFieldName, requestStructName))
+		} else {
+			argType := typeWithNoImport(arg.Type)
+			foundType := typeWithNoImport(foundField.Type)
+			if argType != foundType {
+				errs = append(errs, fmt.Errorf("argument %v in function %v has different type in pb.go file. expected %v got %v", arg.Name, fn.Name, argType, foundType))
+			}
 		}
+
 	}
 
 	responseStructName := responseStructName(fn)
@@ -115,10 +163,17 @@ func validateFuncionInPbGoFile(fn *types.Function, pbGoFile *types.File) (errs [
 			continue
 		}
 		protoFieldName := mstrings.ToUpperFirst(res.Name)
-		foundArg := findField(protoFieldName, s)
-		if foundArg == nil {
+		foundField := findField(protoFieldName, s)
+		if foundField == nil {
 			errs = append(errs, fmt.Errorf("did not find field %v in struct %v in grpc pb file", protoFieldName, responseStructName))
+		} else {
+			resType := typeWithNoImport(res.Type)
+			foundType := typeWithNoImport(foundField.Type)
+			if resType != foundType {
+				errs = append(errs, fmt.Errorf("result %v in function %v has different type in pb.go file. expected %v got %v", res.Name, fn.Name, resType, foundType))
+			}
 		}
+
 	}
 	return
 }
