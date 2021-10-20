@@ -4,6 +4,17 @@ This is a fork of the original microgen repo: https://github.com/devimteam/micro
 Tool to generate microservices, based on [go-kit](https://gokit.io/), by specified service interface.  
 The goal is to generate code for service which not fun to write but it should be written.
 
+## Changes from the original repo
+1. made the package a go module (added go.mod)
+2. removed all dependencies of the $GOPATH - now you can run the tool from any directory
+3. added a frienfly prompt in order to help fill the required fields needed to run the tool
+4. added defult implementation for converter functions
+5. added validation for the interface given - validate the corresponding pb.go file has the same property names and types
+6. embeded "unimplementedServer" object to grpc server struct
+7. added packgename input
+8. added a "message" field to the generated logging middleware
+9. reordered the README to show the most important things at the top
+
 ## Install
 ```
 go get -u github.com/recolabs/microgen/cmd/microgen
