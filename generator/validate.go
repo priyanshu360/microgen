@@ -30,6 +30,30 @@ func validateFunction(fn *types.Function, pbGoFile *types.File) (errs []error) {
 	if mstrings.ContainTag(mstrings.FetchTags(fn.Docs, TagMark+MicrogenMainTag), "-") {
 		return
 	}
+	if mstrings.ContainTag(mstrings.FetchTags(fn.Docs, TagMark+MicrogenMainTag), "one-to-many") {
+		for _, param := range append(fn.Args, fn.Results...) {
+			if param.Name == "" {
+				errs = append(errs, fmt.Errorf("%s: unnamed parameter of type %s", fn.Name, param.Type.String()))
+			}
+		}
+		return
+	}
+	if mstrings.ContainTag(mstrings.FetchTags(fn.Docs, TagMark+MicrogenMainTag), "many-to-many") {
+		for _, param := range append(fn.Args, fn.Results...) {
+			if param.Name == "" {
+				errs = append(errs, fmt.Errorf("%s: unnamed parameter of type %s", fn.Name, param.Type.String()))
+			}
+		}
+		return
+	}
+	if mstrings.ContainTag(mstrings.FetchTags(fn.Docs, TagMark+MicrogenMainTag), "many-to-one") {
+		for _, param := range append(fn.Args, fn.Results...) {
+			if param.Name == "" {
+				errs = append(errs, fmt.Errorf("%s: unnamed parameter of type %s", fn.Name, param.Type.String()))
+			}
+		}
+		return
+	}
 	if !template.IsContextFirst(fn.Args) {
 		errs = append(errs, fmt.Errorf("%s: first argument should be of type context.Context", fn.Name))
 	}
