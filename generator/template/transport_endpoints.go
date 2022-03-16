@@ -10,7 +10,10 @@ import (
 )
 
 const (
-	EndpointsSetName = "EndpointsSet"
+	EndpointsSetName         = "EndpointsSet"
+	OneToManyStreamEndpoint  = "OneToManyStreamEndpoint"
+	ManyToManyStreamEndpoint = "ManyToManyStreamEndpoint"
+	ManyToOneStreamEndpoint  = "ManyToOneStreamEndpoint"
 )
 
 type endpointsTemplate struct {
@@ -47,8 +50,26 @@ func (t *endpointsTemplate) Render(ctx context.Context) write_strategy.Renderer 
 	f.HeaderComment(t.info.FileHeader)
 
 	f.Comment(fmt.Sprintf("%s implements %s API and used for transport purposes.", EndpointsSetName, t.info.Iface.Name))
+	f.Type().Id(OneToManyStreamEndpoint).Func().Params(Id("req").Interface(), Id("stream").Interface()).
+		Params(Error()).Line()
+	f.Type().Id(ManyToManyStreamEndpoint).Func().Params(Id("stream").Interface()).
+		Params(Error()).Line()
+	f.Type().Id(ManyToOneStreamEndpoint).Func().Params(Id("stream").Interface()).
+		Params(Error()).Line()
 	f.Type().Id(EndpointsSetName).StructFunc(func(g *Group) {
 		for _, signature := range t.info.Iface.Methods {
+			if t.info.OneToManyStreamMethods[signature.Name] {
+				g.Id(endpointsStructFieldName(signature.Name)).Id(OneToManyStreamEndpoint)
+				continue
+			}
+			if t.info.ManyToManyStreamMethods[signature.Name] {
+				g.Id(endpointsStructFieldName(signature.Name)).Id(ManyToManyStreamEndpoint)
+				continue
+			}
+			if t.info.ManyToOneStreamMethods[signature.Name] {
+				g.Id(endpointsStructFieldName(signature.Name)).Id(ManyToOneStreamEndpoint)
+				continue
+			}
 			if t.info.AllowedMethods[signature.Name] {
 				g.Id(endpointsStructFieldName(signature.Name)).Qual(PackagePathGoKitEndpoint, "Endpoint")
 			}

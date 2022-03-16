@@ -74,6 +74,18 @@ func (t *gRPCServerTemplate) Render(ctx context.Context) write_strategy.Renderer
 		unimplementedServerEmbedString := fmt.Sprintf("pb.Unimplemented%s", serverStructName(t.info.Iface))
 		g.Id(unimplementedServerEmbedString)
 		for _, method := range t.info.Iface.Methods {
+			if t.info.OneToManyStreamMethods[method.Name] {
+				g.Id(mstrings.ToLowerFirst(method.Name)).Qual(t.info.OutputPackageImport+"/transport", OneToManyStreamEndpoint)
+				continue
+			}
+			if t.info.ManyToManyStreamMethods[method.Name] {
+				g.Id(mstrings.ToLowerFirst(method.Name)).Qual(t.info.OutputPackageImport+"/transport", ManyToManyStreamEndpoint)
+				continue
+			}
+			if t.info.ManyToOneStreamMethods[method.Name] {
+				g.Id(mstrings.ToLowerFirst(method.Name)).Qual(t.info.OutputPackageImport+"/transport", ManyToOneStreamEndpoint)
+				continue
+			}
 			if !t.info.AllowedMethods[method.Name] {
 				continue
 			}
@@ -97,6 +109,27 @@ func (t *gRPCServerTemplate) Render(ctx context.Context) write_strategy.Renderer
 		Block(
 			Return().Op("&").Id(privateServerStructName(t.info.Iface)).Values(DictFunc(func(g Dict) {
 				for _, m := range t.info.Iface.Methods {
+					if t.info.OneToManyStreamMethods[m.Name] {
+						g[(&Statement{}).Id(mstrings.ToLowerFirst(m.Name))] = Line().Id("newOneToManyStreamServer").
+							Call(
+								Line().Id("endpoints").Dot(endpointsStructFieldName(m.Name)),
+							)
+						continue
+					}
+					if t.info.ManyToManyStreamMethods[m.Name] {
+						g[(&Statement{}).Id(mstrings.ToLowerFirst(m.Name))] = Line().Id("newManyToManyStreamServer").
+							Call(
+								Line().Id("endpoints").Dot(endpointsStructFieldName(m.Name)),
+							)
+						continue
+					}
+					if t.info.ManyToOneStreamMethods[m.Name] {
+						g[(&Statement{}).Id(mstrings.ToLowerFirst(m.Name))] = Line().Id("newManyToOneStreamServer").
+							Call(
+								Line().Id("endpoints").Dot(endpointsStructFieldName(m.Name)),
+							)
+						continue
+					}
 					if !t.info.AllowedMethods[m.Name] {
 						continue
 					}
@@ -113,7 +146,60 @@ func (t *gRPCServerTemplate) Render(ctx context.Context) write_strategy.Renderer
 		)
 	f.Line()
 
+	f.Func().
+		Id("newOneToManyStreamServer").
+		Params(
+			Id("endpoint").Qual(t.info.OutputPackageImport+"/transport", OneToManyStreamEndpoint),
+		).
+		Params(
+			Qual(t.info.OutputPackageImport+"/transport", OneToManyStreamEndpoint),
+		).
+		Block(
+			Return().Id("endpoint"),
+		)
+
+	f.Line()
+
+	f.Func().
+		Id("newManyToOneStreamServer").
+		Params(
+			Id("endpoint").Qual(t.info.OutputPackageImport+"/transport", ManyToOneStreamEndpoint),
+		).
+		Params(
+			Qual(t.info.OutputPackageImport+"/transport", ManyToOneStreamEndpoint),
+		).
+		Block(
+			Return().Id("endpoint"),
+		)
+
+	f.Line()
+
+	f.Func().
+		Id("newManyToManyStreamServer").
+		Params(
+			Id("endpoint").Qual(t.info.OutputPackageImport+"/transport", ManyToManyStreamEndpoint),
+		).
+		Params(
+			Qual(t.info.OutputPackageImport+"/transport", ManyToManyStreamEndpoint),
+		).
+		Block(
+			Return().Id("endpoint"),
+		)
+	f.Line()
+
 	for _, signature := range t.info.Iface.Methods {
+		if t.info.OneToManyStreamMethods[signature.Name] {
+			f.Add(t.grpcOneToManyStreamServerFunc(signature, t.info)).Line()
+			continue
+		}
+		if t.info.ManyToManyStreamMethods[signature.Name] {
+			f.Add(t.grpcManyToManyStreamServerFunc(signature, t.info)).Line()
+			continue
+		}
+		if t.info.ManyToOneStreamMethods[signature.Name] {
+			f.Add(t.grpcManyToOneStreamServerFunc(signature, t.info)).Line()
+			continue
+		}
 		if !t.info.AllowedMethods[signature.Name] {
 			continue
 		}
@@ -121,6 +207,52 @@ func (t *gRPCServerTemplate) Render(ctx context.Context) write_strategy.Renderer
 	}
 
 	return f
+}
+
+func (t *gRPCServerTemplate) grpcOneToManyStreamServerFunc(signature *types.Function, info *GenerationInfo) *Statement {
+	return Func().
+		Params(Id(rec(privateServerStructName(info.Iface))).Op("*").Id(privateServerStructName(info.Iface))).
+		Id(signature.Name).
+		Call(
+			Id("req").Add(t.grpcServerReqStruct(signature)),
+			Id("stream").Qual(info.ProtobufPackageImport, streamStructName(info.Iface.Name, signature))).
+		Params(Error()).
+		BlockFunc(t.grpcOneToManyStreamServerFuncBody(signature, info.Iface))
+}
+func (t *gRPCServerTemplate) grpcOneToManyStreamServerFuncBody(signature *types.Function, i *types.Interface) func(g *Group) {
+	return func(g *Group) {
+		g.List(Id("decoded_req"), Err()).
+			Op(":=").
+			Id(decodeRequestName(signature)).Call(
+			Id("context.Background()"),
+			Id("req"))
+
+		g.If(Err().Op("!=").Nil()).Block(
+			Return().List(Err()),
+		)
+
+		g.Return().Id(rec(privateServerStructName(i))).Dot(mstrings.ToLowerFirst(signature.Name)).Call(
+			Id("decoded_req"),
+			Id("stream"),
+		)
+	}
+}
+func (t *gRPCServerTemplate) grpcManyToManyStreamServerFunc(signature *types.Function, info *GenerationInfo) *Statement {
+	return t.grpcManyToOneStreamServerFunc(signature, info)
+}
+func (t *gRPCServerTemplate) grpcManyToOneStreamServerFunc(signature *types.Function, info *GenerationInfo) *Statement {
+
+	return Func().
+		Params(Id(rec(privateServerStructName(info.Iface))).Op("*").Id(privateServerStructName(info.Iface))).
+		Id(signature.Name).
+		Call(Id("stream").Qual(info.ProtobufPackageImport, streamStructName(info.Iface.Name, signature))).
+		Params(Error()).
+		BlockFunc(t.grpcManyToOneStreamServerFuncBody(signature, info.Iface))
+}
+func (t *gRPCServerTemplate) grpcManyToOneStreamServerFuncBody(signature *types.Function, i *types.Interface) func(g *Group) {
+	return func(g *Group) {
+		g.Return().Id(rec(privateServerStructName(i))).Dot(mstrings.ToLowerFirst(signature.Name)).Call(Id("stream"))
+	}
 }
 
 func (gRPCServerTemplate) DefaultPath() string {

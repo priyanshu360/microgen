@@ -44,6 +44,7 @@ func NewEndpointsServerTemplate(info *GenerationInfo) Template {
 func (t *endpointsServerTemplate) Render(ctx context.Context) write_strategy.Renderer {
 	f := NewFile("transport")
 	f.HeaderComment(t.info.FileHeader)
+	f.ImportAlias(t.info.ProtobufPackageImport, "pb")
 
 	f.Add(t.allEndpoints()).Line()
 	if Tags(ctx).HasAny(TracingMiddlewareTag) {
@@ -51,6 +52,18 @@ func (t *endpointsServerTemplate) Render(ctx context.Context) write_strategy.Ren
 		f.Add(t.serverTracingMiddleware()).Line()
 	}
 	for _, signature := range t.info.Iface.Methods {
+		if t.info.OneToManyStreamMethods[signature.Name] {
+			f.Add(createOneToManyStreamEndpoint(signature, t.info)).Line().Line()
+			continue
+		}
+		if t.info.ManyToManyStreamMethods[signature.Name] {
+			f.Add(createManyToManyStreamEndpoint(signature, t.info)).Line().Line()
+			continue
+		}
+		if t.info.ManyToOneStreamMethods[signature.Name] {
+			f.Add(createManyToOneStreamEndpoint(signature, t.info)).Line().Line()
+			continue
+		}
 		if t.info.AllowedMethods[signature.Name] {
 			f.Add(createEndpoint(signature, t.info)).Line().Line()
 		}
@@ -132,6 +145,116 @@ func createEndpointBody(signature *normalizedFunction) *Statement {
 //			}
 //		}
 //
+func removeLastVar(slice []types.Variable) []types.Variable {
+	if len(slice) > 0 {
+		return slice[:len(slice)-1]
+	}
+	return slice
+}
+
+func createOneToManyStreamEndpoint(signature *types.Function, info *GenerationInfo) *Statement {
+	normal := normalizeFunction(signature)
+	return Func().
+		Id(endpointsStructFieldName(signature.Name)).Params(Id("svc").Qual(info.SourcePackageImport, info.Iface.Name)).
+		Params(Id(OneToManyStreamEndpoint)).
+		Block(createOneToManyStreamEndpointBody(info, normal))
+}
+
+func streamStructName(ifaceName string, signature *types.Function) string {
+	return ifaceName + "_" + signature.Name + "Server"
+}
+
+func createOneToManyStreamEndpointBody(info *GenerationInfo, signature *normalizedFunction) *Statement {
+	return Return(Func().Params(
+		Id("request").Interface(),
+		Id("stream").Interface(),
+	).Params(
+		Error(),
+	).BlockFunc(func(g *Group) {
+		g.Id("req").Op(":=").Id("request").Assert(Op("*").Id(requestStructName(signature.parent)))
+		g.Id("st").Op(":=").Id("stream").Assert(Qual(info.ProtobufPackageImport, streamStructName(info.Iface.Name, signature.parent)))
+
+		g.Add(paramNames(signature.Results).
+			Op(":=").
+			Id("svc").
+			Dot(signature.Name).
+			CallFunc(func(g *Group) {
+				for _, field := range removeLastVar(signature.parent.Args) {
+					v := Dot(mstrings.ToUpperFirst(field.Name))
+					if types.IsEllipsis(field.Type) {
+						v.Op("...")
+					}
+					g.Add(Id("req").Add(v))
+				}
+				g.Add(Id("st"))
+			}))
+
+		g.Return(
+			Id(nameOfLastResultError(&signature.Function)),
+		)
+	}))
+}
+
+func createManyToManyStreamEndpoint(signature *types.Function, info *GenerationInfo) *Statement {
+	normal := normalizeFunction(signature)
+	return Func().
+		Id(endpointsStructFieldName(signature.Name)).Params(Id("svc").Qual(info.SourcePackageImport, info.Iface.Name)).
+		Params(Id(ManyToManyStreamEndpoint)).
+		Block(createManyToManyStreamEndpointBody(info, normal))
+}
+
+func createManyToManyStreamEndpointBody(info *GenerationInfo, signature *normalizedFunction) *Statement {
+	return Return(Func().Params(
+		Id("stream").Interface(),
+	).Params(
+		Error(),
+	).BlockFunc(func(g *Group) {
+		g.Id("st").Op(":=").Id("stream").Assert(Qual(info.ProtobufPackageImport, streamStructName(info.Iface.Name, signature.parent)))
+
+		g.Add(paramNames(signature.Results).
+			Op(":=").
+			Id("svc").
+			Dot(signature.Name).
+			CallFunc(func(g *Group) {
+				g.Add(Id("st"))
+			}))
+
+		g.Return(
+			Id(nameOfLastResultError(&signature.Function)),
+		)
+	}))
+}
+
+func createManyToOneStreamEndpoint(signature *types.Function, info *GenerationInfo) *Statement {
+	normal := normalizeFunction(signature)
+	return Func().
+		Id(endpointsStructFieldName(signature.Name)).Params(Id("svc").Qual(info.SourcePackageImport, info.Iface.Name)).
+		Params(Id(ManyToOneStreamEndpoint)).
+		Block(createManyToOneStreamEndpointBody(info, normal))
+}
+
+func createManyToOneStreamEndpointBody(info *GenerationInfo, signature *normalizedFunction) *Statement {
+	return Return(Func().Params(
+		Id("stream").Interface(),
+	).Params(
+		Error(),
+	).BlockFunc(func(g *Group) {
+		g.Id("st").Op(":=").Id("stream").Assert(Qual(info.ProtobufPackageImport, streamStructName(info.Iface.Name, signature.parent)))
+
+		g.Add(paramNames(signature.Results).
+			Op(":=").
+			Id("svc").
+			Dot(signature.Name).
+			CallFunc(func(g *Group) {
+				g.Add(Id("st"))
+			}))
+
+		g.Return(
+			Id(nameOfLastResultError(&signature.Function)),
+		)
+	}))
+}
+
 func createEndpoint(signature *types.Function, info *GenerationInfo) *Statement {
 	normal := normalizeFunction(signature)
 	return Func().
