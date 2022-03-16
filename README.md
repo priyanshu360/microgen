@@ -13,7 +13,8 @@ The goal is to generate code for service which not fun to write but it should be
 6. embeded "unimplementedServer" object to grpc server struct
 7. added packgename input
 8. added a "message" field to the generated logging middleware
-9. reordered the README to show the most important things at the top
+9. added support for stream proto apis
+10. reordered the README to show the most important things at the top
 
 ## Install
 ```
@@ -182,6 +183,37 @@ type StringService interface {
 ```
 
 ### Method's tags
+#### @microgen one-to-many
+Microgen will treat this function as a one to many stream api.
+
+```go
+// @microgen main, logging
+type StringService interface {
+    // @microgen one-to-many
+    Count(text string, symbol string, stream v1.StringService_CountServer) (err error)
+}
+```
+#### @microgen many-to-many
+Microgen will treat this function as a many to many stream api.
+
+```go
+// @microgen main, logging
+type StringService interface {
+    // @microgen many-to-many
+    Count(stream v1.StringService_CountServer) (err error)
+}
+```
+
+#### @microgen many-to-one
+Microgen will treat this function as a many to one stream api.
+
+```go
+// @microgen main, logging
+type StringService interface {
+    // @microgen many-to-one
+    Count(stream v1.StringService_CountServer) (err error)
+}
+```
 #### @microgen -
 Microgen will ignore method with this tag everywere it can.
 
