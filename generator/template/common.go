@@ -100,9 +100,12 @@ type GenerationInfo struct {
 	OutputFilePath      string
 	FileHeader          string
 
-	ProtobufPackageImport string
-	ProtobufClientAddr    string
-	AllowedMethods        map[string]bool
+	ProtobufPackageImport   string
+	ProtobufClientAddr      string
+	AllowedMethods          map[string]bool
+	OneToManyStreamMethods  map[string]bool
+	ManyToManyStreamMethods map[string]bool
+	ManyToOneStreamMethods  map[string]bool
 }
 
 func (i GenerationInfo) String() string {
@@ -118,6 +121,9 @@ func (i GenerationInfo) String() string {
 		fmt.Sprint("ProtobufPackageImport: ", i.ProtobufPackageImport),
 		fmt.Sprint("ProtobufClientAddr: ", i.ProtobufClientAddr),
 		fmt.Sprint("AllowedMethods: ", listKeysOfMap(i.AllowedMethods)),
+		fmt.Sprint("OneToManyStreamMethods: ", listKeysOfMap(i.OneToManyStreamMethods)),
+		fmt.Sprint("ManyToManyStreamMethods: ", listKeysOfMap(i.ManyToManyStreamMethods)),
+		fmt.Sprint("ManyToOneStreamMethods: ", listKeysOfMap(i.ManyToOneStreamMethods)),
 		fmt.Sprint(),
 	)
 	return strings.Join(ss, "\n\t")
