@@ -21,12 +21,13 @@ var (
 )
 
 type gRPCEndpointConverterTemplate struct {
-	info             *GenerationInfo
-	requestEncoders  []*types.Function
-	requestDecoders  []*types.Function
-	responseEncoders []*types.Function
-	responseDecoders []*types.Function
-	state            WriteStrategyState
+	info                  *GenerationInfo
+	requestEncoders       []*types.Function
+	requestDecoders       []*types.Function
+	streamRequestDecoders []*types.Function
+	responseEncoders      []*types.Function
+	responseDecoders      []*types.Function
+	state                 WriteStrategyState
 }
 
 func NewGRPCEndpointConverterTemplate(info *GenerationInfo) Template {
@@ -114,6 +115,9 @@ func (t *gRPCEndpointConverterTemplate) Render(ctx context.Context) write_strate
 	}
 	for _, signature := range t.requestDecoders {
 		f.Line().Add(t.decodeRequest(ctx, signature))
+	}
+	for _, signature := range t.streamRequestDecoders {
+		f.Line().Add(t.decodeStreamRequest(ctx, signature))
 	}
 	for _, signature := range t.responseDecoders {
 		f.Line().Add(t.decodeResponse(ctx, signature))
@@ -246,7 +250,13 @@ func (t *gRPCEndpointConverterTemplate) Prepare(ctx context.Context) error {
 		return ErrProtobufEmpty
 	}
 	for _, fn := range t.info.Iface.Methods {
-		if !t.info.AllowedMethods[fn.Name] {
+		if !t.info.AllowedMethods[fn.Name] ||
+			t.info.ManyToManyStreamMethods[fn.Name] ||
+			t.info.ManyToOneStreamMethods[fn.Name] {
+			continue
+		}
+		if t.info.OneToManyStreamMethods[fn.Name] {
+			t.streamRequestDecoders = append(t.streamRequestDecoders, fn)
 			continue
 		}
 		t.requestDecoders = append(t.requestDecoders, fn)
@@ -474,6 +484,35 @@ func (t *gRPCEndpointConverterTemplate) encodeResponse(ctx context.Context, sign
 //			}, nil
 //		}
 //
+func (t *gRPCEndpointConverterTemplate) decodeStreamRequest(ctx context.Context, signature *types.Function) *Statement {
+	methodParams := removeLastVar(RemoveContextIfFirst(signature.Args))
+	fullName := "request"
+	shortName := "req"
+	return Line().Func().Id(decodeRequestName(signature)).Call(ctx_contextContext, Id(fullName).Interface()).Params(Interface(), Error()).BlockFunc(
+		func(group *Group) {
+			if len(methodParams) == 1 {
+				sp := specialEndpointConverterFromProto(methodParams[0], signature, requestStructName, t.info.SourcePackageImport, fullName, shortName)
+				if sp != nil {
+					group.Add(sp)
+					return
+				}
+			}
+			if len(methodParams) > 0 {
+				group.If(Id(fullName).Op("==").Nil()).Block(
+					Return(Nil(), Qual(PackagePathErrors, "New").Call(Lit("nil "+requestStructName(signature)))),
+				)
+				group.Id(shortName).Op(":=").Id(fullName).Assert(Op("*").Qual(t.info.ProtobufPackageImport, requestStructName(signature)))
+				for _, field := range methodParams {
+					if _, ok := protoTypeToGolang(ctx, "", &field); !ok {
+						group.Add(convertCustomType(shortName, protoToType(field.Type, 0), &field))
+					}
+				}
+			}
+			group.Return().List(t.grpcEndpointConvReturn(ctx, signature, methodParams, requestStructName, shortName, protoTypeToGolang, t.info.OutputPackageImport+"/transport"), Nil())
+		},
+	).Line()
+}
+
 func (t *gRPCEndpointConverterTemplate) decodeRequest(ctx context.Context, signature *types.Function) *Statement {
 	methodParams := RemoveContextIfFirst(signature.Args)
 	fullName := "request"

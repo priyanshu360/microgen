@@ -51,20 +51,30 @@ func ListTemplatesForGen(ctx context.Context, iface *types.Interface, absOutPath
 	if err != nil {
 		return nil, err
 	}
-	m := make(map[string]bool, len(iface.Methods))
+
+	allowedMethods := make(map[string]bool, len(iface.Methods))
+	oneToManyStreamMethods := make(map[string]bool, len(iface.Methods))
+	manyToManyStreamMethods := make(map[string]bool, len(iface.Methods))
+	manyToOneStreamMethods := make(map[string]bool, len(iface.Methods))
 	for _, fn := range iface.Methods {
-		m[fn.Name] = !mstrings.ContainTag(mstrings.FetchTags(fn.Docs, TagMark+MicrogenMainTag), "-")
+		allowedMethods[fn.Name] = !mstrings.ContainTag(mstrings.FetchTags(fn.Docs, TagMark+MicrogenMainTag), "-")
+		oneToManyStreamMethods[fn.Name] = mstrings.ContainTag(mstrings.FetchTags(fn.Docs, TagMark+MicrogenMainTag), "one-to-many")
+		manyToManyStreamMethods[fn.Name] = mstrings.ContainTag(mstrings.FetchTags(fn.Docs, TagMark+MicrogenMainTag), "many-to-many")
+		manyToOneStreamMethods[fn.Name] = mstrings.ContainTag(mstrings.FetchTags(fn.Docs, TagMark+MicrogenMainTag), "many-to-one")
 	}
 	info := &template.GenerationInfo{
-		SourcePackageImport:   packageName,
-		SourceFilePath:        absSourcePath,
-		Iface:                 iface,
-		OutputPackageImport:   packageName,
-		OutputFilePath:        absOutPath,
-		ProtobufPackageImport: mstrings.FetchMetaInfo(TagMark+ProtobufTag, iface.Docs),
-		FileHeader:            defaultFileHeader,
-		AllowedMethods:        m,
-		ProtobufClientAddr:    mstrings.FetchMetaInfo(TagMark+GRPCClientAddr, iface.Docs),
+		SourcePackageImport:     packageName,
+		SourceFilePath:          absSourcePath,
+		Iface:                   iface,
+		OutputPackageImport:     packageName,
+		OutputFilePath:          absOutPath,
+		ProtobufPackageImport:   mstrings.FetchMetaInfo(TagMark+ProtobufTag, iface.Docs),
+		FileHeader:              defaultFileHeader,
+		AllowedMethods:          allowedMethods,
+		OneToManyStreamMethods:  oneToManyStreamMethods,
+		ManyToManyStreamMethods: manyToManyStreamMethods,
+		ManyToOneStreamMethods:  manyToOneStreamMethods,
+		ProtobufClientAddr:      mstrings.FetchMetaInfo(TagMark+GRPCClientAddr, iface.Docs),
 	}
 	lg.Logger.Logln(3, "\nGeneration Info:", info.String())
 	/*stubSvc, err := NewGenUnit(ctx, template.NewStubInterfaceTemplate(info), absOutPath)

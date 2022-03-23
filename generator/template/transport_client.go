@@ -66,9 +66,108 @@ func (t *endpointsClientTemplate) Render(ctx context.Context) write_strategy.Ren
 		f.Add(t.clientTracingMiddleware()).Line()
 	}
 	for _, signature := range t.info.Iface.Methods {
+		if t.info.OneToManyStreamMethods[signature.Name] {
+			f.Add(t.serviceOneToManyStreamEndpointMethod(ctx, signature)).Line().Line()
+			continue
+		}
+		if t.info.ManyToManyStreamMethods[signature.Name] {
+			f.Add(t.serviceManyToManyStreamEndpointMethod(ctx, signature)).Line().Line()
+			continue
+		}
+		if t.info.ManyToOneStreamMethods[signature.Name] {
+			f.Add(t.serviceManyToOneStreamEndpointMethod(ctx, signature)).Line().Line()
+			continue
+		}
 		f.Add(t.serviceEndpointMethod(ctx, signature)).Line().Line()
 	}
 	return f
+}
+
+func (t *endpointsClientTemplate) serviceOneToManyStreamEndpointMethod(ctx context.Context, signature *types.Function) *Statement {
+	normal := normalizeFunction(signature)
+	return methodDefinitionFull(ctx, EndpointsSetName, &normal.Function).
+		BlockFunc(t.serviceOneToManyStreamEndpointMethodBody(ctx, signature, &normal.Function))
+}
+func (t *endpointsClientTemplate) serviceOneToManyStreamEndpointMethodBody(ctx context.Context, fn *types.Function, normal *types.Function) func(g *Group) {
+	reqName := "request"
+	respName := "response"
+	return func(g *Group) {
+		if !t.info.AllowedMethods[fn.Name] {
+			g.Return()
+			return
+		}
+
+		g.Id(reqName).Op(":=").Id(requestStructName(fn)).Values(dictByNormalVariables(removeLastVar(fn.Args), removeLastVar(normal.Args)))
+		g.Add(List(Id(nameOfLastResultError(normal))).Op("=")).Id(strings.LastWordFromName(EndpointsSetName)).Dot(endpointsStructFieldName(fn.Name)).Call(Id(firstArgName(normal)), Op("&").Id(reqName))
+		g.If(Id(nameOfLastResultError(normal)).Op("!=").Nil().BlockFunc(func(ifg *Group) {
+			if Tags(ctx).HasAny(GrpcTag, GrpcClientTag, GrpcServerTag) {
+				ifg.Add(checkGRPCError(normal))
+			}
+			ifg.Return()
+		}))
+		g.ReturnFunc(func(group *Group) {
+			for _, field := range removeErrorIfLast(fn.Results) {
+				group.Id(respName).Assert(Op("*").Id(responseStructName(fn))).Op(".").Add(structFieldName(&field))
+			}
+			group.Id(nameOfLastResultError(normal))
+		})
+	}
+}
+func (t *endpointsClientTemplate) serviceManyToManyStreamEndpointMethod(ctx context.Context, signature *types.Function) *Statement {
+	normal := normalizeFunction(signature)
+	return methodDefinitionFull(ctx, EndpointsSetName, &normal.Function).
+		BlockFunc(t.serviceManyToManyStreamEndpointMethodBody(ctx, signature, &normal.Function))
+}
+func (t *endpointsClientTemplate) serviceManyToManyStreamEndpointMethodBody(ctx context.Context, fn *types.Function, normal *types.Function) func(g *Group) {
+	respName := "response"
+	return func(g *Group) {
+		if !t.info.AllowedMethods[fn.Name] {
+			g.Return()
+			return
+		}
+
+		g.Add(List(Id(nameOfLastResultError(normal))).Op("=")).Id(strings.LastWordFromName(EndpointsSetName)).Dot(endpointsStructFieldName(fn.Name)).Call(Id(firstArgName(normal)))
+		g.If(Id(nameOfLastResultError(normal)).Op("!=").Nil().BlockFunc(func(ifg *Group) {
+			if Tags(ctx).HasAny(GrpcTag, GrpcClientTag, GrpcServerTag) {
+				ifg.Add(checkGRPCError(normal))
+			}
+			ifg.Return()
+		}))
+		g.ReturnFunc(func(group *Group) {
+			for _, field := range removeErrorIfLast(fn.Results) {
+				group.Id(respName).Assert(Op("*").Id(responseStructName(fn))).Op(".").Add(structFieldName(&field))
+			}
+			group.Id(nameOfLastResultError(normal))
+		})
+	}
+}
+func (t *endpointsClientTemplate) serviceManyToOneStreamEndpointMethod(ctx context.Context, signature *types.Function) *Statement {
+	normal := normalizeFunction(signature)
+	return methodDefinitionFull(ctx, EndpointsSetName, &normal.Function).
+		BlockFunc(t.serviceManyToOneStreamEndpointMethodBody(ctx, signature, &normal.Function))
+}
+func (t *endpointsClientTemplate) serviceManyToOneStreamEndpointMethodBody(ctx context.Context, fn *types.Function, normal *types.Function) func(g *Group) {
+	respName := "response"
+	return func(g *Group) {
+		if !t.info.AllowedMethods[fn.Name] {
+			g.Return()
+			return
+		}
+
+		g.Add(List(Id(nameOfLastResultError(normal))).Op("=")).Id(strings.LastWordFromName(EndpointsSetName)).Dot(endpointsStructFieldName(fn.Name)).Call(Id(firstArgName(normal)))
+		g.If(Id(nameOfLastResultError(normal)).Op("!=").Nil().BlockFunc(func(ifg *Group) {
+			if Tags(ctx).HasAny(GrpcTag, GrpcClientTag, GrpcServerTag) {
+				ifg.Add(checkGRPCError(normal))
+			}
+			ifg.Return()
+		}))
+		g.ReturnFunc(func(group *Group) {
+			for _, field := range removeErrorIfLast(fn.Results) {
+				group.Id(respName).Assert(Op("*").Id(responseStructName(fn))).Op(".").Add(structFieldName(&field))
+			}
+			group.Id(nameOfLastResultError(normal))
+		})
+	}
 }
 
 func (endpointsClientTemplate) DefaultPath() string {

@@ -132,7 +132,10 @@ func (t *httpServerTemplate) Render(ctx context.Context) write_strategy.Renderer
 	).BlockFunc(func(g *Group) {
 		g.Id("mux").Op(":=").Qual(PackagePathGorillaMux, "NewRouter").Call()
 		for _, fn := range t.info.Iface.Methods {
-			if !t.info.AllowedMethods[fn.Name] {
+			if !t.info.AllowedMethods[fn.Name] ||
+				t.info.ManyToManyStreamMethods[fn.Name] ||
+				t.info.ManyToOneStreamMethods[fn.Name] ||
+				t.info.OneToManyStreamMethods[fn.Name] {
 				continue
 			}
 			g.Id("mux").Dot("Methods").Call(Lit(t.methods[fn.Name])).Dot("Path").

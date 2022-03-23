@@ -149,7 +149,10 @@ func (t *httpClientTemplate) Render(ctx context.Context) write_strategy.Renderer
 			),
 		)
 		for _, signature := range t.info.Iface.Methods {
-			if !t.info.AllowedMethods[signature.Name] {
+			if !t.info.AllowedMethods[signature.Name] ||
+				t.info.ManyToManyStreamMethods[signature.Name] ||
+				t.info.ManyToOneStreamMethods[signature.Name] ||
+				t.info.OneToManyStreamMethods[signature.Name] {
 				continue
 			}
 			src.Add(t.serviceDiscoveryFactory(ctx, signature))
@@ -188,7 +191,10 @@ func (t *httpClientTemplate) clientBody(ctx context.Context) *Statement {
 	g.Return(Qual(t.info.OutputPackageImport+"/transport", EndpointsSetName).Values(DictFunc(
 		func(d Dict) {
 			for _, fn := range t.info.Iface.Methods {
-				if !t.info.AllowedMethods[fn.Name] {
+				if !t.info.AllowedMethods[fn.Name] ||
+					t.info.ManyToManyStreamMethods[fn.Name] ||
+					t.info.ManyToOneStreamMethods[fn.Name] ||
+					t.info.OneToManyStreamMethods[fn.Name] {
 					continue
 				}
 				method := FetchHttpMethodTag(fn.Docs)

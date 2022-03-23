@@ -70,7 +70,10 @@ func (t *gRPCClientTemplate) Render(ctx context.Context) write_strategy.Renderer
 			}
 			g.Return().Qual(t.info.OutputPackageImport+"/transport", EndpointsSetName).Values(DictFunc(func(d Dict) {
 				for _, m := range t.info.Iface.Methods {
-					if !t.info.AllowedMethods[m.Name] {
+					if !t.info.AllowedMethods[m.Name] ||
+						t.info.ManyToManyStreamMethods[m.Name] ||
+						t.info.ManyToOneStreamMethods[m.Name] ||
+						t.info.OneToManyStreamMethods[m.Name] {
 						continue
 					}
 					client := &Statement{}
