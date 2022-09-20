@@ -18,7 +18,7 @@ The goal is to generate code for service which not fun to write but it should be
 
 ## Install
 ```
-go get -u github.com/recolabs/microgen/cmd/microgen
+go install github.com/recolabs/microgen/cmd/microgen@latest
 ```
 
 Note: If you have problems with building microgen, please clone the repository, and run 
