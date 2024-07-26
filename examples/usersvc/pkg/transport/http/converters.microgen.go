@@ -8,7 +8,7 @@ import (
 	"context"
 	"encoding/json"
 	transport "github.com/recolabs/microgen/examples/usersvc/pkg/transport"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"path"
 )
@@ -18,7 +18,7 @@ func CommonHTTPRequestEncoder(_ context.Context, r *http.Request, request interf
 	if err := json.NewEncoder(&buf).Encode(request); err != nil {
 		return err
 	}
-	r.Body = ioutil.NopCloser(&buf)
+	r.Body = io.NopCloser(&buf)
 	return nil
 }
 

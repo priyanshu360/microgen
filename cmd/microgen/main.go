@@ -6,7 +6,6 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -51,7 +50,7 @@ func readFromInput(prefix string, delim byte) (string, error) {
 }
 
 func findPackageNameFromGoModFile(filePath string) (string, error) {
-	buffer, err := ioutil.ReadFile(filePath)
+	buffer, err := os.ReadFile(filePath)
 	if err != nil {
 		return "", err
 	}

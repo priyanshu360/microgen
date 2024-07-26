@@ -4,7 +4,7 @@ package transporthttp
 
 import (
 	endpoint "github.com/go-kit/kit/endpoint"
-	log "github.com/go-kit/kit/log"
+	log "github.com/go-kit/log"
 	sd "github.com/go-kit/kit/sd"
 	lb "github.com/go-kit/kit/sd/lb"
 	opentracing "github.com/go-kit/kit/tracing/opentracing"

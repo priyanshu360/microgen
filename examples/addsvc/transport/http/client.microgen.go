@@ -3,7 +3,7 @@
 package transporthttp
 
 import (
-	log "github.com/go-kit/kit/log"
+	log "github.com/go-kit/log"
 	opentracing "github.com/go-kit/kit/tracing/opentracing"
 	httpkit "github.com/go-kit/kit/transport/http"
 	opentracinggo "github.com/opentracing/opentracing-go"

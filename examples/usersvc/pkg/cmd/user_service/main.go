@@ -12,7 +12,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	log "github.com/go-kit/kit/log"
+	log "github.com/go-kit/log"
 	opentracinggo "github.com/opentracing/opentracing-go"
 	protobuf "github.com/recolabs/microgen/examples/protobuf"
 	service "github.com/recolabs/microgen/examples/usersvc/pkg/service"

@@ -6,7 +6,7 @@ import (
 	context "context"
 	entity "github.com/recolabs/microgen/example/svc/entity"
 	testout "github.com/recolabs/microgen/generator/test_out"
-	log "github.com/go-kit/kit/log"
+	log "github.com/go-kit/log"
 	time "time"
 )
 

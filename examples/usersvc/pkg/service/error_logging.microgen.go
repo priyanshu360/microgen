@@ -4,7 +4,7 @@ package service
 
 import (
 	"context"
-	log "github.com/go-kit/kit/log"
+	log "github.com/go-kit/log"
 	service "github.com/recolabs/microgen/examples/usersvc/pkg/usersvc"
 )
 

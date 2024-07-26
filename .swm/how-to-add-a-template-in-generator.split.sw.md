@@ -178,7 +178,7 @@ This is the fun part! First, read the example output. This is how the output of 
 🟩 40     //		import (
 🟩 41     //			context "context"
 🟩 42     //			svc "github.com/recolabs/microgen/examples/svc"
-🟩 43     //			log "github.com/go-kit/kit/log"
+🟩 43     //			log "github.com/go-kit/log"
 🟩 44     //			time "time"
 🟩 45     //		)
 🟩 46     //

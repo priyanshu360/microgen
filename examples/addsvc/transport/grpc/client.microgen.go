@@ -3,7 +3,7 @@
 package transportgrpc
 
 import (
-	log "github.com/go-kit/kit/log"
+	log "github.com/go-kit/log"
 	opentracing "github.com/go-kit/kit/tracing/opentracing"
 	grpckit "github.com/go-kit/kit/transport/grpc"
 	opentracinggo "github.com/opentracing/opentracing-go"

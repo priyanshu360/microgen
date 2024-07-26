@@ -5,7 +5,7 @@ package service
 import (
 	"context"
 	"fmt"
-	log "github.com/go-kit/kit/log"
+	log "github.com/go-kit/log"
 	service "github.com/recolabs/microgen/examples/addsvc/addsvc"
 )
 
