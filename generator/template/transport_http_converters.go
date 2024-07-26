@@ -340,7 +340,8 @@ func (t *httpConverterTemplate) encodeHTTPRequest(fn *types.Function) *Statement
 func (t *httpConverterTemplate) encodeHTTPRequestBody(fn *types.Function) *Statement {
 	s := &Statement{}
 	pathVars := Lit(mstrings.ToURLSnakeCase(fn.Name))
-	if FetchHttpMethodTag(fn.Docs) == "GET" {
+	argVars := RemoveContextIfFirst(fn.Args)
+	if FetchHttpMethodTag(fn.Docs) == "GET" && len(argVars) != 0 {
 		s.Id("req").Op(":=").Id("request").Assert(Op("*").Qual(t.info.OutputPackageImport+"/transport", requestStructName(fn))).Line()
 		pathVars.Add(t.pathConverters(fn))
 	}
